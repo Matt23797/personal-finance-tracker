@@ -1,5 +1,5 @@
 # personal-finance-tracker
-An open source personal finance tracker/monthly budgeting app
+An open source personal finance tracker/monthly budgeting flask app
 =======
 # Personal Finance Tracker
 
@@ -59,3 +59,4 @@ A template configuration is provided in `deploy/finance.conf`.
 
 ## License
 MIT
+
