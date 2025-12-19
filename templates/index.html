@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1>Dashboard</h1>
+        <p style="color: var(--text-muted);">Overview of your financial health</p>
+    </div>
+    <select id="period-selector">
+        <option value="this-month">This Month</option>
+        <option value="last-30">Last 30 Days</option>
+        <option value="all-time" selected>All Time</option>
+    </select>
+</header>
+
+
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Cards -->
+    <div class="card">
+        <h3 style="color: #00ff88; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.9rem;">Total Income
+        </h3>
+        <div style="font-size: 2.5rem; font-weight: 700;">$<span id="total-income">0.00</span></div>
+    </div>
+    <div class="card">
+        <h3 style="color: #ff6b6b; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.9rem;">Total Expenses
+        </h3>
+        <div style="font-size: 2.5rem; font-weight: 700;">$<span id="total-expense">0.00</span></div>
+    </div>
+    <div class="card">
+        <h3 style="color: #00d9ff; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.9rem;">Net Flow</h3>
+        <div style="font-size: 2.5rem; font-weight: 700;">$<span id="net-flow">0.00</span></div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+    <!-- Expense Breakdown Chart -->
+    <div class="card">
+        <h2>Expense Breakdown</h2>
+        <div style="position: relative; height: 300px;">
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Quick Actions / Goals Summary -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2>Top Goals</h2>
+            <a href="/goals" class="btn btn-secondary btn-small">View All</a>
+        </div>
+        <div id="goals-preview">
+            <p style="color: var(--text-muted);">Loading...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

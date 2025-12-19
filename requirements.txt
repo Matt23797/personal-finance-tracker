@@ -1,0 +1,10 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flasgger
+requests
+python-dotenv
+PyJWT
+cryptography
+gunicorn
+ofxparse

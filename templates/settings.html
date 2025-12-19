@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header style="margin-bottom: 2rem;">
+    <h1>Settings</h1>
+    <p style="color: var(--text-muted);">Manage your account and connections</p>
+</header>
+
+<div style="max-width: 600px;">
+    <!-- SimpleFin Status -->
+    <div class="card">
+        <h2>Bank Connection</h2>
+        <div id="status-box"
+            style="margin: 1.5rem 0; padding: 1rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.05);">
+            <div id="status-dot" style="width: 10px; height: 10px; border-radius: 50%; background: #666;"></div>
+            <span id="status-text">Checking...</span>
+        </div>
+
+        <div id="connect-form" style="display: none;">
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">Enter your SimpleFin Access Key. It will be
+                encrypted securely.</p>
+            <div class="form-group">
+                <input type="password" id="simplefin-key" placeholder="Paste Access Key or Setup Token">
+            </div>
+            <button class="btn btn-primary" onclick="connect()">Connect</button>
+        </div>
+
+        <div id="manage-form" style="display: none;">
+            <button class="btn btn-primary" id="sync-btn" onclick="syncBank()">Sync Now</button>
+            <button class="btn btn-danger" onclick="disconnect()">Disconnect</button>
+
+            <div id="sync-result" style="margin-top: 1rem; display: none;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function checkStatus() {
+        const res = await fetchAuth('/api/simplefin/status');
+        const data = await res.json();
+
+        const dot = document.getElementById('status-dot');
+        const text = document.getElementById('status-text');
+
+        if (data.connected) {
+            dot.style.background = '#00ff88';
+            text.textContent = 'Connected to SimpleFin';
+            document.getElementById('connect-form').style.display = 'none';
+            document.getElementById('manage-form').style.display = 'block';
+        } else {
+            dot.style.background = '#ff6b6b';
+            text.textContent = 'Not connected';
+            document.getElementById('connect-form').style.display = 'block';
+            document.getElementById('manage-form').style.display = 'none';
+        }
+    }
+
+    async function connect() {
+        const key = document.getElementById('simplefin-key').value;
+        if (!key) { alert('Please enter key'); return; }
+
+        const res = await fetchAuth('/simplefin/save-key', {
+            method: 'POST',
+            body: JSON.stringify({ access_key: key })
+        });
+
+        if (res.ok) {
+            alert('Connected!');
+            checkStatus();
+        } else {
+            const data = await res.json();
+            alert('Failed: ' + (data.message || 'Unknown error'));
+        }
+    }
+
+    async function disconnect() {
+        if (!confirm('Are you sure?')) return;
+        await fetchAuth('/simplefin/disconnect', { method: 'POST' });
+        checkStatus();
+    }
+
+    async function syncBank() {
+        const btn = document.getElementById('sync-btn');
+        const resDiv = document.getElementById('sync-result');
+
+        btn.disabled = true;
+        btn.textContent = '⏳ Syncing...';
+        resDiv.style.display = 'none';
+
+        try {
+            const res = await fetchAuth('/simplefin/sync', { method: 'POST' });
+            const data = await res.json();
+
+            resDiv.style.display = 'block';
+            if (res.ok) {
+                resDiv.innerHTML = `
+                    <div style="color: #00ff88; background: rgba(0,255,136,0.1); padding: 1rem; border-radius: 8px;">
+                        ✓ Sync Complete. Found ${data.accounts.length} accounts.<br>
+                        ${data.new_transactions ? `+ ${data.new_transactions} new transactions.` : ''}
+                    </div>
+                `;
+            } else {
+                resDiv.innerHTML = `<div style="color: #ff6b6b;">Error: ${data.message}</div>`;
+            }
+        } catch (e) {
+            resDiv.style.display = 'block';
+            resDiv.innerHTML = `<div style="color: #ff6b6b;">Network Error</div>`;
+        }
+
+        btn.disabled = false;
+        btn.textContent = '🔄 Sync Now';
+    }
+
+    checkStatus();
+</script>
+{% endblock %}

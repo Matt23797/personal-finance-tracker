@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-wallet"></i> Finance
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/transactions" class="nav-link {% if request.path == '/transactions' %}active{% endif %}">
+                    <i class="fas fa-list"></i> Transactions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/goals" class="nav-link {% if request.path == '/goals' %}active{% endif %}">
+                    <i class="fas fa-bullseye"></i> Goals
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/budget" class="nav-link {% if request.path == '/budget' %}active{% endif %}">
+                    <i class="fas fa-wallet"></i> Budget
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/forecast" class="nav-link {% if request.path == '/forecast' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i> Forecast
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/settings" class="nav-link {% if request.path == '/settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </li>
+            <li class="nav-item" style="margin-top: auto;">
+                <a href="#" id="logout-btn" class="nav-link logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
