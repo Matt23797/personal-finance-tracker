@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # personal-finance-tracker
 An open source personal finance tracker/monthly budgeting app
 =======
@@ -60,4 +59,3 @@ A template configuration is provided in `deploy/finance.conf`.
 
 ## License
 MIT
->>>>>>> 909a5cc (Initial commit)
