@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, Income, Expense, Goal, CategoryMapping, EXPENSE_CATEGORIES, User, Budget, MonthlyIncome
+from models import db, Income, Expense, Goal, CategoryMapping, EXPENSE_CATEGORIES, User, Budget, MonthlyIncome, Category
 from functools import wraps
 import jwt
 import os
@@ -517,8 +517,6 @@ def get_categories(current_user_id):
     """
     Get list of user-defined categories. Seeds default if none exist.
     """
-    from models import Category, EXPENSE_CATEGORIES
-    
     categories = Category.query.filter_by(user_id=current_user_id).all()
     
     if not categories:
@@ -537,7 +535,6 @@ def get_categories_extended(current_user_id):
     """
     Get full category objects (id and name)
     """
-    from models import Category
     categories = Category.query.filter_by(user_id=current_user_id).all()
     return jsonify([c.to_dict() for c in categories]), 200
 
@@ -545,7 +542,6 @@ def get_categories_extended(current_user_id):
 @token_required
 def add_category(current_user_id):
     """Add a new custom category"""
-    from models import Category
     data = request.get_json()
     name = data.get('name', '').strip()
     
@@ -565,7 +561,6 @@ def add_category(current_user_id):
 @token_required
 def update_category_name(current_user_id, cat_id):
     """Rename a category and cascade to existing expenses/budgets"""
-    from models import Category, Expense, Budget
     category = Category.query.filter_by(id=cat_id, user_id=current_user_id).first()
     if not category:
         return jsonify({'message': 'Category not found'}), 404
@@ -591,7 +586,6 @@ def update_category_name(current_user_id, cat_id):
 @token_required
 def delete_category(current_user_id, cat_id):
     """Delete a category and set affected expenses/budgets to 'Other'"""
-    from models import Category, Expense, Budget
     category = Category.query.filter_by(id=cat_id, user_id=current_user_id).first()
     if not category:
         return jsonify({'message': 'Category not found'}), 404
@@ -839,9 +833,9 @@ def simplefin_status(current_user_id):
     Check if SimpleFin is connected
     ---
     security:
-    - Bearer: []
+      - Bearer: []
     responses:
-        200:
+      200:
         description: Connection status
     """
     import os
