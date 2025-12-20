@@ -7,6 +7,14 @@ async function loadBudget() {
     }
 
     try {
+        // Fetch Categories first to populate dropdowns
+        const catRes = await fetchAuth('/api/categories');
+        const categories = await catRes.json();
+        const catSelect = document.getElementById('budget-category');
+        if (catSelect) {
+            catSelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
         // Get status
         const statusRes = await fetchAuth(`/api/budget/status?month=${currentMonth}`);
         const status = await statusRes.json();
@@ -123,24 +131,7 @@ function editBudget(category, amount) {
     const catSelect = document.getElementById('budget-category');
     const amountInput = document.getElementById('budget-amount');
 
-    // Check if category exists in dropdown
-    let exists = false;
-    for (let i = 0; i < catSelect.options.length; i++) {
-        if (catSelect.options[i].value === category) {
-            catSelect.value = category;
-            exists = true;
-            break;
-        }
-    }
-
-    if (!exists) {
-        catSelect.value = "Custom";
-        const customInput = document.getElementById('custom-category-input');
-        customInput.style.display = 'block';
-        customInput.value = category;
-    } else {
-        checkCustomCategory(catSelect);
-    }
+    catSelect.value = category;
 
     amountInput.value = amount;
     openBudgetModal();
@@ -171,25 +162,9 @@ function closeBudgetModal() {
 
     // Reset inputs
     const select = document.getElementById('budget-category');
-    const customInput = document.getElementById('custom-category-input');
-    if (select) select.value = "Housing";
-    if (customInput) {
-        customInput.style.display = 'none';
-        customInput.value = '';
-    }
+    if (select) select.selectedIndex = 0;
 }
 
-function checkCustomCategory(select) {
-    const customInput = document.getElementById('custom-category-input');
-    if (!customInput) return;
-
-    if (select.value === 'Custom') {
-        customInput.style.display = 'block';
-        customInput.focus();
-    } else {
-        customInput.style.display = 'none';
-    }
-}
 
 async function saveBudget() {
     const catSelect = document.getElementById('budget-category');
@@ -199,9 +174,6 @@ async function saveBudget() {
     if (!catSelect || !amountInput) return;
 
     let category = catSelect.value;
-    if (category === 'Custom' && customInput) {
-        category = customInput.value.trim();
-    }
 
     const amount = parseFloat(amountInput.value);
 

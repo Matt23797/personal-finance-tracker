@@ -11,6 +11,7 @@ class User(db.Model):
     incomes = db.relationship('Income', backref='user', lazy=True)
     expenses = db.relationship('Expense', backref='user', lazy=True)
     goals = db.relationship('Goal', backref='user', lazy=True)
+    categories = db.relationship('Category', backref='user', lazy=True)
 
     def to_dict(self):
         return {
@@ -121,6 +122,18 @@ class CategoryMapping(db.Model):
             'keyword': self.keyword,
             'category': self.category,
             'count': self.count
+        }
+
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'name': self.name
         }
 
 # Predefined expense categories
