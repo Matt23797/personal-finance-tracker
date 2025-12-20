@@ -240,10 +240,14 @@ def sync_accounts(current_user_id):
                         
                     elif amount < 0:
                         # Expense
+                        # Apply smart categorization
+                        from utils import auto_categorize
+                        mapped_category = auto_categorize(description, current_user_id)
+                        
                         new_expense = Expense(
                             user_id=current_user_id,
                             amount=abs(amount),
-                            category=category, # Use SimpleFin category or map it later
+                            category=mapped_category, # Use our smart categorization
                             description=description,
                             date=txn_date,
                             simplefin_id=txn_id

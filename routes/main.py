@@ -10,6 +10,7 @@ import csv
 import io
 from ofxparse import OfxParser
 from routes.auth import token_required
+from utils import auto_categorize
 
 main_bp = Blueprint('main', __name__, url_prefix='/api')
 
@@ -398,23 +399,6 @@ def delete_goal(current_user_id, goal_id):
     db.session.commit()
     return jsonify({"message": "Goal deleted"}), 200
 
-def auto_categorize(description, user_id):
-    if not description:
-        return 'Other'
-    
-    keyword = description.lower().strip()
-    # Try exact match first
-    mapping = CategoryMapping.query.filter_by(user_id=user_id, keyword=keyword).first()
-    if mapping:
-        return mapping.category
-    
-    # Try fuzzy match (if any mapping keyword is inside the description)
-    all_mappings = CategoryMapping.query.filter_by(user_id=user_id).all()
-    for m in all_mappings:
-        if m.keyword in keyword:
-            return m.category
-            
-    return 'Other'
 
 def process_ofx(content, user_id):
     imported = 0
