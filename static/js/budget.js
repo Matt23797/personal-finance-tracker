@@ -31,18 +31,18 @@ async function loadBudget() {
         const sourceTextEl = document.getElementById('income-source-text');
 
         if (projectedIncomeEl) {
-            projectedIncomeEl.textContent = projectedIncome.toFixed(2);
-            projectedIncomeEl.style.color = proj.is_manual ? '#00ff88' : '#aaa'; // Dimm if not manual
+            projectedIncomeEl.textContent = formatCurrency(projectedIncome).slice(1); // Remove $ for this specific UI
+            projectedIncomeEl.style.color = proj.is_manual ? '#00ff88' : '#aaa';
         }
-        if (leftToBudgetEl) leftToBudgetEl.textContent = (projectedIncome - totalBudgeted).toFixed(2);
+        if (leftToBudgetEl) leftToBudgetEl.textContent = formatCurrency(projectedIncome - totalBudgeted).slice(1);
 
         if (sourceTextEl) {
             if (proj.is_manual) {
                 sourceTextEl.textContent = "Manually set by you";
-                sourceTextEl.style.color = "#00d9ff";
+                sourceTextEl.classList.add('text-primary');
             } else {
                 sourceTextEl.textContent = `Suggested (avg of ${proj.months_analyzed} month(s))`;
-                sourceTextEl.style.color = "var(--text-muted)";
+                sourceTextEl.classList.add('text-muted');
             }
         }
 
@@ -74,10 +74,10 @@ async function loadBudget() {
             if (c.budget > 0) {
                 const diff = spendingProgress - monthProgress;
                 if (diff > 0.1) {
-                    burnMessage = `⚠ Trending ${Math.round(diff * 100)}% over pace`;
+                    burnMessage = `Trending ${Math.round(diff * 100)}% over pace`;
                     burnColor = '#ff6b6b';
                 } else if (diff < -0.1 && spendingProgress > 0) {
-                    burnMessage = `✨ Trending under pace`;
+                    burnMessage = `Trending under pace`;
                     burnColor = '#00ff88';
                 } else {
                     burnMessage = `On track for ${new Date().toLocaleString('default', { month: 'short' })}`;
@@ -85,27 +85,27 @@ async function loadBudget() {
             }
 
             return `
-                <div style="margin-bottom: 1.5rem; position: relative;" class="budget-item" data-category="${c.category}">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="budget-item mb-2" data-category="${c.category}">
+                    <div class="flex-between mb-1">
+                        <div class="flex align-center" style="gap: 8px;">
                             <strong>${c.category}</strong>
-                            <div class="budget-actions" style="display: flex; gap: 5px; opacity: 0; transition: opacity 0.2s;">
-                                <button onclick="editBudget('${c.category}', ${c.budget})" style="background:none; border:none; cursor:pointer; font-size: 0.8rem; color: #00d9ff; padding: 0;">✎</button>
-                                <button onclick="deleteBudget('${c.category}')" style="background:none; border:none; cursor:pointer; font-size: 0.8rem; color: #ff6b6b; padding: 0;">✕</button>
+                            <div class="budget-actions" style="display: flex; gap: 8px; opacity: 0; transition: opacity 0.2s;">
+                                <button onclick="editBudget('${c.category}', ${c.budget})" style="background:none; border:none; cursor:pointer; font-size: 0.8rem; color: #00d9ff; padding: 0;"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteBudget('${c.category}')" style="background:none; border:none; cursor:pointer; font-size: 0.8rem; color: #ff6b6b; padding: 0;"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                         <span>
-                            <span style="color: ${color}; font-weight: bold;">$${c.spent.toFixed(0)}</span>
-                            <span style="color: var(--text-muted);"> / $${c.budget.toFixed(0)}</span>
+                            <span style="color: ${color}; font-weight: bold;">${formatCurrency(c.spent).replace('.00', '')}</span>
+                            <span class="text-muted"> / ${formatCurrency(c.budget).replace('.00', '')}</span>
                         </span>
                     </div>
                     <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
                         <div style="height: 100%; width: ${percent}%; background: ${color}; transition: width 0.5s;"></div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 0.3rem;">
+                    <div class="flex-between mt-1" style="font-size: 0.75rem;">
                         <span style="color: ${burnColor}; font-weight: 500;">${burnMessage}</span>
-                        <span style="color: var(--text-muted);">
-                            ${c.remaining >= 0 ? `$${c.remaining.toFixed(0)} left` : `$${Math.abs(c.remaining).toFixed(0)} over`}
+                        <span class="text-muted">
+                            ${c.remaining >= 0 ? `${formatCurrency(c.remaining).replace('.00', '')} left` : `${formatCurrency(Math.abs(c.remaining)).replace('.00', '')} over`}
                         </span>
                     </div>
                 </div>
@@ -152,13 +152,11 @@ async function deleteBudget(category) {
 }
 
 function openBudgetModal() {
-    const modal = document.getElementById('budget-modal');
-    if (modal) modal.classList.add('active');
+    setupModal('budget-modal').open();
 }
 
 function closeBudgetModal() {
-    const modal = document.getElementById('budget-modal');
-    if (modal) modal.classList.remove('active');
+    setupModal('budget-modal').close();
 
     // Reset inputs
     const select = document.getElementById('budget-category');
@@ -191,13 +189,11 @@ async function saveBudget() {
 }
 
 function openIncomeModal() {
-    const modal = document.getElementById('income-modal');
-    if (modal) modal.classList.add('active');
+    setupModal('income-modal').open();
 }
 
 function closeIncomeModal() {
-    const modal = document.getElementById('income-modal');
-    if (modal) modal.classList.remove('active');
+    setupModal('income-modal').close();
 }
 
 async function saveIncome() {

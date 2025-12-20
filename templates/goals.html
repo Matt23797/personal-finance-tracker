@@ -1,14 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+<header class="flex-between mb-2">
     <h1>Financial Goals</h1>
     <button class="btn btn-primary" onclick="openGoalModal()">+ Add Goal</button>
 </header>
 
-<div style="background: var(--card-bg); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
-    <h2
-        style="font-size: 1rem; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">
+<div class="card mb-2">
+    <h2 class="text-muted mb-1" style="font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">
         Goal Trajectory</h2>
     <div style="position: relative; height: 300px;">
         <canvas id="goalChart"></canvas>
@@ -34,7 +33,7 @@
             <div class="form-group"><label>Deadline</label><input type="date" id="deadline"></div>
         </div>
         <div class="form-group"><label>Current Saved ($)</label><input type="number" id="current" value="0"></div>
-        <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="saveGoal()">Save Goal</button>
+        <button class="btn btn-primary w-100 mt-2" onclick="saveGoal()">Save Goal</button>
     </div>
 </div>
 {% endblock %}

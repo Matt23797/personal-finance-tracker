@@ -4,16 +4,16 @@ async function loadForecast() {
         const data = await res.json();
 
         // Update basic metrics
-        document.getElementById('current-balance').textContent = data.current_balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('daily-burn').textContent = data.daily_burn.toFixed(2);
-        document.getElementById('daily-income').textContent = data.daily_income.toFixed(2);
+        document.getElementById('current-balance').textContent = formatCurrency(data.current_balance).slice(1);
+        document.getElementById('daily-burn').textContent = formatCurrency(data.daily_burn).slice(1);
+        document.getElementById('daily-income').textContent = formatCurrency(data.daily_income).slice(1);
 
         // Scenario Analysis Impacts (for 90 days)
         const cut10Impact = (data.daily_burn * 0.1 * 90);
-        document.getElementById('cut-10-impact').textContent = `+$${cut10Impact.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+        document.getElementById('cut-10-impact').textContent = `+${formatCurrency(cut10Impact).replace('.00', '')}`;
 
         const extraIncomeImpact = (500 * (90 / 30));
-        document.getElementById('add-income-impact').textContent = `+$${extraIncomeImpact.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+        document.getElementById('add-income-impact').textContent = `+${formatCurrency(extraIncomeImpact).replace('.00', '')}`;
 
         renderChart(data.projection);
     } catch (error) {
@@ -32,7 +32,7 @@ function renderChart(projection) {
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: projection.map(p => new Date(p.date).toLocaleDateString('default', { month: 'short', day: 'numeric' })),
+            labels: projection.map(p => formatDate(p.date)),
             datasets: [{
                 label: 'Projected Balance',
                 data: projection.map(p => p.balance),
@@ -45,53 +45,7 @@ function renderChart(projection) {
                 tension: 0.4
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index',
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    titleFont: { size: 14, weight: 'bold' },
-                    bodyFont: { size: 13 },
-                    callbacks: {
-                        label: function (context) {
-                            return ` Balance: $${context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.05)',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: '#aaa',
-                        callback: (value) => '$' + value.toLocaleString()
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        color: '#aaa',
-                        maxRotation: 0,
-                        autoSkip: true,
-                        maxTicksLimit: 10
-                    }
-                }
-            }
-        }
+        options: getCommonChartOptions('line')
     });
 }
 

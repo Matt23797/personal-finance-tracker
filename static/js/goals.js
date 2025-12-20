@@ -17,28 +17,26 @@ async function loadGoals() {
 
     container.innerHTML = goals.map(g => {
         const progress = Math.min((g.current_amount / g.target_amount) * 100, 100);
-        const deadline = g.deadline ? new Date(g.deadline).toLocaleDateString() : 'No deadline';
-
         const color = progress >= 100 ? '#00ff88' : '#00d9ff';
 
         return `
-            <div class="card goal-item" style="margin-bottom: 1rem; position: relative;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; align-items: start;">
+            <div class="card goal-item mb-1">
+                <div class="flex-between mb-1" style="align-items: start;">
                     <div>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <div class="flex align-center" style="gap: 8px; margin-bottom: 4px;">
                             <h3 style="margin: 0; font-size: 1.1rem;">${g.description}</h3>
                             <div class="goal-actions" style="display: flex; gap: 8px; opacity: 0; transition: opacity 0.2s;">
-                                <button onclick="editGoal(${g.id})" style="background:none; border:none; cursor:pointer; font-size: 0.9rem; color: #00d9ff; padding: 0;">✎</button>
-                                <button onclick="deleteGoal(${g.id})" style="background:none; border:none; cursor:pointer; font-size: 0.9rem; color: #ff6b6b; padding: 0;">✕</button>
+                                <button onclick="editGoal(${g.id})" style="background:none; border:none; cursor:pointer; font-size: 0.8rem; color: #00d9ff; padding: 0;"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteGoal(${g.id})" style="background:none; border:none; cursor:pointer; font-size: 0.8rem; color: #ff6b6b; padding: 0;"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">
-                            Due: ${deadline}
+                        <div class="text-muted" style="font-size: 0.8rem;">
+                            Due: ${formatDate(g.deadline)}
                         </div>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="color: ${color}; font-weight: 700; font-size: 1.1rem;">$${g.current_amount.toFixed(0)}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">of $${g.target_amount.toFixed(0)}</div>
+                    <div class="text-right">
+                        <div style="color: ${color}; font-weight: 700; font-size: 1.1rem;">${formatCurrency(g.current_amount)}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">of ${formatCurrency(g.target_amount)}</div>
                     </div>
                 </div>
                 
@@ -46,9 +44,9 @@ async function loadGoals() {
                     <div style="height: 100%; width: ${progress}%; background: ${color}; transition: width 0.5s;"></div>
                 </div>
                 
-                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+                <div class="flex-between text-muted" style="font-size: 0.75rem;">
                     <span>${progress.toFixed(0)}% Complete</span>
-                    <span>$${(g.target_amount - g.current_amount).toFixed(0)} remaining</span>
+                    <span>${formatCurrency(g.target_amount - g.current_amount)} remaining</span>
                 </div>
             </div>
         `;
@@ -72,11 +70,11 @@ function openGoalModal() {
     document.getElementById('target').value = '';
     document.getElementById('current').value = '0';
     document.getElementById('deadline').value = '';
-    document.getElementById('goal-modal').classList.add('active');
+    setupModal('goal-modal').open();
 }
 
 function closeGoalModal() {
-    document.getElementById('goal-modal').classList.remove('active');
+    setupModal('goal-modal').close();
 }
 
 async function editGoal(id) {
@@ -91,7 +89,7 @@ async function editGoal(id) {
         document.getElementById('target').value = g.target_amount;
         document.getElementById('current').value = g.current_amount;
         document.getElementById('deadline').value = g.deadline || '';
-        document.getElementById('goal-modal').classList.add('active');
+        setupModal('goal-modal').open();
     }
 }
 
@@ -207,31 +205,7 @@ async function loadGoalChart(goals) {
                 }
             ]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#aaa' }
-                },
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#aaa' }
-                }
-            },
-            plugins: {
-                legend: { labels: { color: '#fff', font: { family: 'Inter' } } },
-                tooltip: {
-                    backgroundColor: '#1a1a2e',
-                    titleColor: '#fff',
-                    bodyColor: '#aaa',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1
-                }
-            }
-        }
+        options: getCommonChartOptions('line')
     });
 }
 

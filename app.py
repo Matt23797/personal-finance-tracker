@@ -2,8 +2,15 @@ from flask import Flask, render_template, jsonify
 from models import db
 from flasgger import Swagger
 from routes.auth import auth_bp
-from routes.main import main_bp
+from routes.transactions import transactions_bp
 from routes.simplefin import simplefin_bp
+from routes.pages import pages_bp
+from routes.goals import goals_bp
+from routes.categories import categories_bp
+from routes.imports import imports_bp
+from routes.forecasts import forecasts_bp
+from routes.budget import budget_bp
+
 import os
 from dotenv import load_dotenv
 import logging
@@ -38,41 +45,19 @@ def create_app(test_config=None):
         app.logger.setLevel(logging.INFO)
         app.logger.info('Finance Tracker startup')
 
+    # Register Blueprints
+    app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp)
-
-    app.register_blueprint(main_bp)
+    app.register_blueprint(transactions_bp)
     app.register_blueprint(simplefin_bp)
+    app.register_blueprint(goals_bp)
+    app.register_blueprint(categories_bp)
+    app.register_blueprint(imports_bp)
+    app.register_blueprint(forecasts_bp)
+    app.register_blueprint(budget_bp)
 
     with app.app_context():
         db.create_all()
-
-    @app.route('/')
-    def index():
-        return render_template('index.html')
-
-    @app.route('/login')
-    def login():
-        return render_template('login.html')
-
-    @app.route('/transactions')
-    def transactions():
-        return render_template('transactions.html')
-
-    @app.route('/goals')
-    def goals():
-        return render_template('goals.html')
-
-    @app.route('/settings')
-    def settings():
-        return render_template('settings.html')
-        
-    @app.route('/budget')
-    def budget_page():
-        return render_template('budget.html')
-
-    @app.route('/forecast')
-    def forecast_page():
-        return render_template('forecast.html')
 
     @app.route('/health')
     def health_check():

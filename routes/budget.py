@@ -9,7 +9,29 @@ budget_bp = Blueprint('budget', __name__, url_prefix='/api/budget')
 @budget_bp.route('', methods=['POST'])
 @token_required
 def set_budget(current_user_id):
-    """Set or update a budget limit for a category"""
+    """
+    Set or update a budget limit for a category
+    ---
+    security:
+      - Bearer: []
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            category:
+              type: string
+            amount:
+              type: number
+            month:
+              type: string
+              description: Format YYYY-MM
+    responses:
+      200:
+        description: Budget saved
+    """
     data = request.get_json()
     category = data.get('category')
     amount = data.get('amount')
@@ -31,7 +53,27 @@ def set_budget(current_user_id):
 @budget_bp.route('/income', methods=['POST'])
 @token_required
 def set_monthly_income(current_user_id):
-    """Set manual income for a month"""
+    """
+    Set manual income for a month
+    ---
+    security:
+      - Bearer: []
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            amount:
+              type: number
+            month:
+              type: string
+              description: Format YYYY-MM
+    responses:
+      200:
+        description: Income saved
+    """
     data = request.get_json()
     amount = data.get('amount')
     month = data.get('month', datetime.now().strftime('%Y-%m'))
@@ -52,7 +94,20 @@ def set_monthly_income(current_user_id):
 @budget_bp.route('/projection', methods=['GET'])
 @token_required
 def get_projection(current_user_id):
-    """Calculate projected income based on available history (up to 3 months) OR manual override"""
+    """
+    Calculate projected income based on history or manual override
+    ---
+    security:
+      - Bearer: []
+    parameters:
+      - name: month
+        in: query
+        type: string
+        description: Format YYYY-MM
+    responses:
+      200:
+        description: Projected income details
+    """
     today = datetime.now()
     month_str = request.args.get('month', today.strftime('%Y-%m'))
     
@@ -97,7 +152,20 @@ def get_projection(current_user_id):
 @budget_bp.route('/status', methods=['GET'])
 @token_required
 def get_status(current_user_id):
-    """Get status of current month's budget vs actuals"""
+    """
+    Get status of current month's budget vs actuals
+    ---
+    security:
+      - Bearer: []
+    parameters:
+      - name: month
+        in: query
+        type: string
+        description: Format YYYY-MM
+    responses:
+      200:
+        description: Budget and spending breakdown
+    """
     month_str = request.args.get('month', datetime.now().strftime('%Y-%m'))
     start_date = datetime.strptime(month_str, '%Y-%m')
     # Simple logic to get end of month
@@ -150,3 +218,31 @@ def get_status(current_user_id):
         'total_spent': total_spent,
         'month': month_str
     }), 200
+
+@budget_bp.route('/<category>', methods=['DELETE'])
+@token_required
+def delete_budget(current_user_id, category):
+    """
+    Remove the budget for a specific category
+    ---
+    security:
+      - Bearer: []
+    parameters:
+      - name: category
+        in: path
+        type: string
+        required: true
+      - name: month
+        in: query
+        type: string
+        description: Format YYYY-MM
+    responses:
+      200:
+        description: Budget deleted
+    """
+    month = request.args.get('month', datetime.now().strftime('%Y-%m'))
+    budget = Budget.query.filter_by(user_id=current_user_id, category=category, month=month).first()
+    if budget:
+        db.session.delete(budget)
+        db.session.commit()
+    return jsonify({'message': 'Budget deleted'}), 200

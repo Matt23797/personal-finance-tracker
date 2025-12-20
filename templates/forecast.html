@@ -1,38 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
-<header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+<header class="flex-between mb-2">
     <div>
         <h1>Financial Forecast</h1>
-        <p style="color: var(--text-muted);">Predicting your financial future for the next 90 days</p>
+        <p class="text-muted">Predicting your financial future for the next 90 days</p>
     </div>
-    <div
-        style="background: rgba(255,255,255,0.05); padding: 1rem 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-        <div style="font-size: 0.8rem; color: var(--text-muted);">Current Estimated Balance</div>
-        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">$<span id="current-balance">0.00</span>
+    <div class="card" style="padding: 1rem 1.5rem; margin-bottom: 0;">
+        <div class="text-muted" style="font-size: 0.8rem;">Current Estimated Balance</div>
+        <div class="text-primary" style="font-size: 1.5rem; font-weight: 700;">$<span id="current-balance">0.00</span>
         </div>
     </div>
 </header>
 
-<div class="card" style="margin-bottom: 2rem; padding: 2rem;">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+<div class="card mb-2" style="padding: 2rem;">
+    <div class="flex-between mb-2" style="align-items: flex-start;">
         <div>
-            <h2 style="margin-bottom: 0.5rem;">90-Day Cash Flow Projection</h2>
-            <p style="font-size: 0.9rem; color: var(--text-muted);">This chart estimates your bank balance based on
+            <h2 class="mb-1">90-Day Cash Flow Projection</h2>
+            <p class="text-muted" style="font-size: 0.9rem;">This chart estimates your bank balance based on
                 current spending habits and planned income.</p>
         </div>
-        <div style="display: flex; gap: 1.5rem;">
-            <div style="text-align: right;">
-                <div
-                    style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+        <div class="flex" style="gap: 1.5rem;">
+            <div class="text-right">
+                <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
                     Burn Rate</div>
                 <div style="font-weight: 600; color: #ff6b6b;">$<span id="daily-burn">0.00</span>/day</div>
             </div>
-            <div style="text-align: right;">
-                <div
-                    style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+            <div class="text-right">
+                <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
                     Income</div>
-                <div style="font-weight: 600; color: #00ff88;">$<span id="daily-income">0.00</span>/day</div>
+                <div class="text-secondary" style="font-weight: 600;">$<span id="daily-income">0.00</span>/day</div>
             </div>
         </div>
     </div>
@@ -44,21 +41,20 @@
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
     <div class="card">
         <h3>Scenario Analysis</h3>
-        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">How changes to your habits affect
-            your future.</p>
+        <p class="text-muted mb-2" style="font-size: 0.9rem;">How changes to your habits affect your future.</p>
 
-        <div style="margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+        <div class="mb-1">
+            <div class="flex-between mb-1" style="font-size: 0.85rem;">
                 <span>Cut spending by 10%</span>
-                <span id="cut-10-impact" style="color: #00ff88;">+$0.00</span>
+                <span id="cut-10-impact" class="text-secondary">+$0.00</span>
             </div>
             <div style="height: 4px; background: rgba(0, 255, 136, 0.2); border-radius: 2px;"></div>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+        <div class="mb-1">
+            <div class="flex-between mb-1" style="font-size: 0.85rem;">
                 <span>Add $500 monthly income</span>
-                <span id="add-income-impact" style="color: #00ff88;">+$0.00</span>
+                <span id="add-income-impact" class="text-secondary">+$0.00</span>
             </div>
             <div style="height: 4px; background: rgba(0, 255, 136, 0.2); border-radius: 2px;"></div>
         </div>
@@ -66,7 +62,7 @@
 
     <div class="card">
         <h3>Forecast Assumptions</h3>
-        <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.2rem; line-height: 1.6;">
+        <ul class="text-muted" style="font-size: 0.85rem; padding-left: 1.2rem; line-height: 1.6;">
             <li>Current balance is calculated from all-time transaction history.</li>
             <li>Daily burn rate is an average of the last 60 days of expenses.</li>
             <li>Planned budgets for the current month are considered "committed" spending.</li>

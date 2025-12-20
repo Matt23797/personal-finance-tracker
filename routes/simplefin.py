@@ -7,7 +7,7 @@ import os
 import requests
 import base64
 
-simplefin_bp = Blueprint('simplefin', __name__, url_prefix='/simplefin')
+simplefin_bp = Blueprint('simplefin', __name__, url_prefix='/api/simplefin')
 
 # Get or generate encryption key (store this securely!)
 def get_encryption_key():
@@ -309,3 +309,20 @@ def get_accounts(current_user_id):
             return jsonify({'message': 'Failed to fetch accounts', 'status': response.status_code}), response.status_code
     except Exception as e:
         return jsonify({'message': 'Error', 'error': str(e)}), 500
+
+@simplefin_bp.route('/status', methods=['GET'])
+@token_required
+def simplefin_status(current_user_id):
+    """
+    Check if SimpleFin is connected for the user
+    ---
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Connection status
+    """
+    user = User.query.get(current_user_id)
+    return jsonify({
+        'connected': bool(user and user.simplefin_token)
+    }), 200

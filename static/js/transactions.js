@@ -86,13 +86,13 @@ function renderTable(txns) {
         }
 
         return `
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <tr class="border-bottom">
                 <td style="padding: 1rem;">
                     <input type="checkbox" class="txn-check" data-id="${t.id}" data-type="${t.type}" onchange="updateBulkBar()">
                 </td>
-                <td style="padding: 1rem;">${date}</td>
+                <td style="padding: 1rem;">${formatDate(t.date)}</td>
                 <td style="padding: 1rem;">${t.desc}</td>
-                <td style="padding: 1rem; color: ${color}; font-weight: 600;">${sign}$${t.amount.toFixed(2)}</td>
+                <td style="padding: 1rem; color: ${color}; font-weight: 600;">${sign}${formatCurrency(t.amount)}</td>
                 <td style="padding: 1rem;">${catCell}</td>
             </tr>
         `;
@@ -193,7 +193,6 @@ function openAddModal(type) {
     const catGroup = document.getElementById('cat-group');
     const catSelect = document.getElementById('txn-category');
     const txnDate = document.getElementById('txn-date');
-    const modal = document.getElementById('add-modal');
 
     if (modalTitle) modalTitle.textContent = type === 'income' ? 'Add Income' : 'Add Expense';
     if (catGroup) catGroup.style.display = type === 'income' ? 'none' : 'block';
@@ -204,14 +203,12 @@ function openAddModal(type) {
 
     if (txnDate) txnDate.valueAsDate = new Date();
 
-    if (modal) modal.classList.add('active');
-
+    setupModal('add-modal').open();
     hideSmartBadge();
 }
 
 function closeAddModal() {
-    const modal = document.getElementById('add-modal');
-    if (modal) modal.classList.remove('active');
+    setupModal('add-modal').close();
 
     const amountInput = document.getElementById('txn-amount');
     const descInput = document.getElementById('txn-desc');
@@ -259,16 +256,14 @@ async function submitTransaction() {
 
 // Import Modal Logic
 function openImportModal() {
-    const modal = document.getElementById('import-modal');
-    if (modal) modal.classList.add('active');
+    setupModal('import-modal').open();
     document.getElementById('import-status').style.display = 'none';
     document.getElementById('import-btn').disabled = false;
     document.getElementById('import-file').value = '';
 }
 
 function closeImportModal() {
-    const modal = document.getElementById('import-modal');
-    if (modal) modal.classList.remove('active');
+    setupModal('import-modal').close();
 }
 
 async function processImport() {
@@ -326,7 +321,7 @@ async function suggestCategory(desc) {
     }
 
     try {
-        const res = await fetchAuth('/api/suggest-category', {
+        const res = await fetchAuth('/api/categories/suggest', {
             method: 'POST',
             body: JSON.stringify({ description: desc })
         });

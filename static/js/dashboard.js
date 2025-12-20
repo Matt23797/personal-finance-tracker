@@ -25,11 +25,11 @@ async function loadDashboard() {
         const summaryRes = await fetchAuth(`/api/summary${queryParams}`);
         const summary = await summaryRes.json();
 
-        document.getElementById('total-income').textContent = summary.total_income.toFixed(2);
-        document.getElementById('total-expense').textContent = summary.total_expense.toFixed(2);
+        document.getElementById('total-income').textContent = formatCurrency(summary.total_income).slice(1);
+        document.getElementById('total-expense').textContent = formatCurrency(summary.total_expense).slice(1);
         const netFlow = summary.total_income - summary.total_expense;
         const netFlowEl = document.getElementById('net-flow');
-        netFlowEl.textContent = netFlow.toFixed(2);
+        netFlowEl.textContent = formatCurrency(netFlow).slice(1);
         netFlowEl.style.color = netFlow >= 0 ? '#00ff88' : '#ff6b6b';
 
         // Goals Preview
@@ -56,10 +56,10 @@ async function loadGoalsPreview() {
         goalsContainer.innerHTML = goals.slice(0, 3).map(g => {
             const progress = Math.min((g.current_amount / g.target_amount) * 100, 100);
             return `
-                <div style="background: rgba(255,255,255,0.03); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.5rem;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+                <div class="mb-1" style="background: rgba(255,255,255,0.03); padding: 0.8rem; border-radius: 8px;">
+                    <div class="flex-between mb-1">
                         <strong>${g.description}</strong>
-                        <span style="color: var(--primary);">$${g.current_amount} / $${g.target_amount}</span>
+                        <span class="text-primary">${formatCurrency(g.current_amount).replace('.00', '')} / ${formatCurrency(g.target_amount).replace('.00', '')}</span>
                     </div>
                     <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
                         <div style="height: 100%; width: ${progress}%; background: linear-gradient(90deg, var(--primary), var(--secondary));"></div>
@@ -91,13 +91,7 @@ function renderChart(breakdown) {
                 borderWidth: 0
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'right', labels: { color: '#fff' } }
-            }
-        }
+        options: getCommonChartOptions('doughnut')
     });
 }
 

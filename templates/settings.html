@@ -1,24 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-<header style="margin-bottom: 2rem;">
+<header class="mb-2">
     <h1>Settings</h1>
-    <p style="color: var(--text-muted);">Manage your account and connections</p>
+    <p class="text-muted">Manage your account and connections</p>
 </header>
 
 <div style="max-width: 600px;">
     <!-- SimpleFin Status -->
     <div class="card">
-        <h2>🔗 Bank Connection</h2>
-        <div id="status-box"
-            style="margin: 1.5rem 0; padding: 1rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.05);">
+        <h2>Bank Connection</h2>
+        <div id="status-box" class="flex align-center mt-2 mb-2"
+            style="padding: 1rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05);">
             <div id="status-dot" style="width: 10px; height: 10px; border-radius: 50%; background: #666;"></div>
             <span id="status-text">Checking...</span>
         </div>
 
         <div id="connect-form" style="display: none;">
-            <p style="color: var(--text-muted); margin-bottom: 1rem;">Enter your SimpleFin Access Key. It will be
-                encrypted securely.</p>
+            <p class="text-muted mb-2">Enter your SimpleFin Access Key. It will be encrypted securely.</p>
             <div class="form-group">
                 <input type="password" id="simplefin-key" placeholder="Paste Access Key or Setup Token">
             </div>
@@ -26,30 +25,31 @@
         </div>
 
         <div id="manage-form" style="display: none;">
-            <button class="btn btn-primary" id="sync-btn" onclick="syncBank()">🔄 Sync Now</button>
-            <button class="btn btn-danger" onclick="disconnect()">Disconnect</button>
-
-            <div id="sync-result" style="margin-top: 1rem; display: none;"></div>
+            <div class="flex">
+                <button class="btn btn-primary" id="sync-btn" onclick="syncBank()">Sync Now</button>
+                <button class="btn btn-danger" onclick="disconnect()">Disconnect</button>
+            </div>
+            <div id="sync-result" class="mt-2" style="display: none;"></div>
         </div>
         <!-- Category Management -->
-        <div class="card" style="margin-top: 2rem;">
-            <h2>🏷️ Manage Categories</h2>
-            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+        <div class="card mt-2">
+            <h2>Manage Categories</h2>
+            <p class="text-muted mb-2">
                 Edit or remove your categories. Renaming will update all historic transactions.
             </p>
 
             <!-- Category Dropdown + Actions -->
-            <div
-                style="display: flex; gap: 1rem; align-items: center; margin-bottom: 2rem; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+            <div class="flex align-center mb-2"
+                style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
                 <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
-                    <select id="manage-category-select" onchange="updateManageButtons()" style="width: 100%;"></select>
+                    <select id="manage-category-select" onchange="updateManageButtons()" class="w-100"></select>
                 </div>
                 <button class="btn btn-secondary" onclick="renameCurrent()">Rename</button>
                 <button class="btn btn-danger" id="delete-current-btn" onclick="deleteCurrent()">Delete</button>
             </div>
 
             <!-- Add Category -->
-            <div style="display: flex; gap: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+            <div class="flex mt-2" style="padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
                 <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
                     <input type="text" id="new-cat-name" placeholder="New category name (e.g. Travel)">
                 </div>
@@ -198,7 +198,7 @@
             const key = document.getElementById('simplefin-key').value;
             if (!key) { alert('Please enter key'); return; }
 
-            const res = await fetchAuth('/simplefin/save-key', {
+            const res = await fetchAuth('/api/simplefin/save-key', {
                 method: 'POST',
                 body: JSON.stringify({ access_key: key })
             });
@@ -214,7 +214,7 @@
 
         async function disconnect() {
             if (!confirm('Are you sure?')) return;
-            await fetchAuth('/simplefin/disconnect', { method: 'POST' });
+            await fetchAuth('/api/simplefin/disconnect', { method: 'POST' });
             checkStatus();
         }
 
@@ -227,7 +227,7 @@
             resDiv.style.display = 'none';
 
             try {
-                const res = await fetchAuth('/simplefin/sync', { method: 'POST' });
+                const res = await fetchAuth('/api/simplefin/sync', { method: 'POST' });
                 const data = await res.json();
 
                 resDiv.style.display = 'block';
@@ -247,7 +247,7 @@
             }
 
             btn.disabled = false;
-            btn.textContent = '🔄 Sync Now';
+            btn.textContent = 'Sync Now';
         }
 
         checkStatus();

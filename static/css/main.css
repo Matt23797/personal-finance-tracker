@@ -220,6 +220,68 @@ select {
     gap: 1rem;
 }
 
+/* Layout & Spacing Utilities */
+.flex {
+    display: flex;
+    gap: 1rem;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.mt-1 {
+    margin-top: 0.5rem;
+}
+
+.mt-2 {
+    margin-top: 1rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+    margin-bottom: 1.5rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+.text-primary {
+    color: var(--primary);
+}
+
+.text-secondary {
+    color: var(--secondary);
+}
+
+.w-100 {
+    width: 100%;
+}
+
 /* Modal */
 .modal {
     display: none;

@@ -1,75 +1,74 @@
 {% extends "base.html" %}
 
 {% block content %}
-<header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+<style>
+    .filter-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
 
-    <style>
-        .filter-bar {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            align-items: center;
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-group label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    .bulk-actions-bar {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        display: none;
+        gap: 1.5rem;
+        align-items: center;
+        border: 1px solid var(--primary);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        z-index: 100;
+    }
+
+    .bulk-actions-bar.active {
+        display: flex;
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            bottom: -5rem;
+            opacity: 0;
         }
 
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .filter-group label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-
-        .bulk-actions-bar {
-            position: fixed;
+        to {
             bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            display: none;
-            gap: 1.5rem;
-            align-items: center;
-            border: 1px solid var(--primary);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            z-index: 100;
+            opacity: 1;
         }
+    }
 
-        .bulk-actions-bar.active {
-            display: flex;
-            animation: slideUp 0.3s ease;
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
         }
-
-        @keyframes slideUp {
-            from {
-                bottom: -5rem;
-                opacity: 0;
-            }
-
-            to {
-                bottom: 2rem;
-                opacity: 1;
-            }
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
+    }
+</style>
+<header class="flex-between mb-2">
     <div>
         <h1>Transactions</h1>
-        <p style="color: var(--text-muted);">Manage your income and expenses</p>
+        <p class="text-muted">Manage your income and expenses</p>
     </div>
-    <div style="display: flex; gap: 1rem;">
-        <button class="btn btn-secondary btn-small" onclick="openImportModal()">📥 Import</button>
+    <div class="flex">
+        <button class="btn btn-secondary btn-small" onclick="openImportModal()">Import</button>
         <button class="btn btn-primary btn-small" onclick="openAddModal('income')">+ Add Income</button>
         <button class="btn btn-primary btn-small" onclick="openAddModal('expense')">+ Add Expense</button>
     </div>
@@ -138,7 +137,7 @@
 
 <div id="bulk-bar" class="bulk-actions-bar">
     <div style="color: #fff; font-weight: 600;"><span id="bulk-count">0</span> selected</div>
-    <div style="display: flex; gap: 0.5rem; align-items: center;">
+    <div class="flex align-center">
         <label style="font-size: 0.8rem; color: #aaa;">Categorize as:</label>
         <select id="bulk-category"></select>
         <button class="btn btn-primary btn-small" onclick="applyBulkUpdate()">Apply</button>
@@ -162,7 +161,7 @@
             <input type="text" id="txn-desc" placeholder="Enter description">
         </div>
         <div class="form-group" id="cat-group">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="flex-between">
                 <label>Category <span id="smart-badge"
                         style="display:none; font-size:0.75em; background: linear-gradient(135deg, #00d9ff, #00ff88); color: #000; padding: 2px 8px; border-radius: 12px; margin-left: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,255,136,0.3);">✨
                         Smart Pick</span></label>
@@ -184,7 +183,7 @@
             <h2>Import Transactions</h2>
             <button class="modal-close" onclick="closeImportModal()">&times;</button>
         </div>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        <p class="text-muted mb-2" style="font-size: 0.9rem;">
             Upload a <b>CSV</b>, <b>OFX</b>, or <b>QFX</b> file from your bank.
             We'll automatically detect columns and skip duplicates.
         </p>

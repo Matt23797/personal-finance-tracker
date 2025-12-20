@@ -1,22 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<header style="margin-bottom: 2rem;">
+<header class="mb-2">
     <h1>Monthly Budget</h1>
-    <p id="month-display" style="color: var(--text-muted); text-transform: capitalize;"></p>
+    <p id="month-display" class="text-muted" style="text-transform: capitalize;"></p>
 </header>
 
 <div
     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
     <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div class="flex-between">
             <h3>Projected Income</h3>
-            <button class="btn btn-sm" onclick="openIncomeModal()"
-                style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">Edit</button>
+            <button class="btn btn-secondary btn-small" onclick="openIncomeModal()">Edit</button>
         </div>
-        <div style="font-size: 2rem; font-weight: 700; color: #00ff88;">$<span id="projected-income">0.00</span></div>
-        <p style="font-size: 0.85rem; color: var(--text-muted);" id="income-source-text">Based on average income
-        </p>
+        <div class="text-secondary" style="font-size: 2rem; font-weight: 700;">$<span id="projected-income">0.00</span>
+        </div>
+        <p class="text-muted" style="font-size: 0.85rem;" id="income-source-text">Based on average income</p>
     </div>
     <div class="card">
         <h3>Left to Budget</h3>
@@ -25,7 +24,7 @@
 </div>
 
 <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div class="flex-between mb-2">
         <h2>Budget Categories</h2>
         <button class="btn btn-primary" onclick="openBudgetModal()">Set Budget</button>
     </div>
@@ -49,7 +48,7 @@
             <label>Amount ($)</label>
             <input type="number" id="manual-income-amount" step="100">
         </div>
-        <button class="btn btn-primary" style="width: 100%;" onclick="saveIncome()">Save</button>
+        <button class="btn btn-primary w-100" onclick="saveIncome()">Save</button>
     </div>
 </div>
 
@@ -71,7 +70,7 @@
             <label>Limit ($)</label>
             <input type="number" id="budget-amount" step="10">
         </div>
-        <button class="btn btn-primary" style="width: 100%;" onclick="saveBudget()">Save</button>
+        <button class="btn btn-primary w-100" onclick="saveBudget()">Save</button>
     </div>
 </div>
 {% endblock %}
