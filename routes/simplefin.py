@@ -224,7 +224,7 @@ def sync_accounts(current_user_id):
                     timestamp = txn.get('posted')
                     txn_date = datetime.fromtimestamp(timestamp) if timestamp else datetime.utcnow()
                     description = txn.get('payee') or txn.get('description') or 'Unknown Transaction'
-                    category = txn.get('category') or 'Uncategorized'
+                    category = 'Other'
                     
                     if amount > 0:
                         # Income

@@ -84,9 +84,8 @@ body {
 }
 
 .logout-btn {
-    margin-top: auto;
-    color: #ff6b6b;
     cursor: pointer;
+    color: #ff6b6b;
 }
 
 /* Main Content */
@@ -95,7 +94,7 @@ body {
     flex-grow: 1;
     padding: 2rem;
     max-width: 1400px;
-    width: 100%;
+    width: calc(100% - 250px);
 }
 
 /* Utility Classes */
@@ -261,4 +260,78 @@ select {
     color: #888;
     font-size: 1.5rem;
     cursor: pointer;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo {
+        margin-bottom: 1rem;
+        justify-content: center;
+    }
+
+    .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .nav-item {
+        margin-bottom: 0;
+    }
+
+    .nav-link {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+        gap: 0.5rem;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+        transform: none;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 1rem !important;
+    }
+
+    .card {
+        padding: 1rem;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+
+    .filter-bar {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    /* Shrink the transactions table scroll area on mobile */
+    .card {
+        margin-bottom: 1rem;
+    }
 }

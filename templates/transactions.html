@@ -69,7 +69,7 @@
         <p style="color: var(--text-muted);">Manage your income and expenses</p>
     </div>
     <div style="display: flex; gap: 1rem;">
-        <button class="btn btn-secondary btn-small" onclick="openImportModal()">Import</button>
+        <button class="btn btn-secondary btn-small" onclick="openImportModal()">📥 Import</button>
         <button class="btn btn-primary btn-small" onclick="openAddModal('income')">+ Add Income</button>
         <button class="btn btn-primary btn-small" onclick="openAddModal('expense')">+ Add Expense</button>
     </div>
@@ -106,24 +106,24 @@
     </div>
 </div>
 
-<div class="card">
-    <table style="width: 100%; border-collapse: collapse;">
+<div class="card" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+    <table style="width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 800px;">
         <thead>
             <tr>
-                <th style="padding: 1rem; width: 40px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <th style="padding: 1rem; width: 50px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                     <input type="checkbox" id="select-all" onclick="toggleSelectAll()">
                 </th>
                 <th
-                    style="text-align: left; padding: 1rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    style="text-align: left; padding: 1rem; width: 120px; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.1);">
                     Date</th>
                 <th
                     style="text-align: left; padding: 1rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.1);">
                     Description / Source</th>
                 <th
-                    style="text-align: left; padding: 1rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    style="text-align: left; padding: 1rem; width: 15% ; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.1);">
                     Amount</th>
                 <th
-                    style="text-align: left; padding: 1rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    style="text-align: left; padding: 1rem; width: 20%; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.1);">
                     Category</th>
             </tr>
         </thead>

@@ -76,11 +76,11 @@ function renderTable(txns) {
 
         let catCell = '';
         if (t.type === 'income') {
-            catCell = '<span style="color: #00ff88; background: rgba(0,255,136,0.1); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem;">Income</span>';
+            catCell = '<span style="display: inline-block; width: 100%; color: #00ff88; background: rgba(0,255,136,0.1); padding: 0.5rem; border-radius: 8px; font-size: 0.9rem; text-align: left; border: 1px solid rgba(0,255,136,0.2);">Income</span>';
         } else {
             // Dropdown for Expenses
             const options = categories.map(c => `<option value="${c}" ${c === t.category ? 'selected' : ''}>${c}</option>`).join('');
-            catCell = `<select onchange="updateCategory(${t.id}, this.value)">
+            catCell = `<select onchange="updateCategory(${t.id}, this.value)" style="width: 100%;">
                 ${options}
             </select>`;
         }
