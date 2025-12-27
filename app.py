@@ -12,6 +12,10 @@ from routes.forecasts import forecasts_bp
 from routes.budget import budget_bp
 
 import os
+import sys
+import webbrowser
+import threading
+import time
 from dotenv import load_dotenv
 import logging
 from logging.handlers import RotatingFileHandler
@@ -20,14 +24,26 @@ load_dotenv()
 
 
 def create_app(test_config=None):
-    app = Flask(__name__)
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+        template_folder = os.path.join(base_path, 'templates')
+        static_folder = os.path.join(base_path, 'static')
+        app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
+    else:
+        app = Flask(__name__)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key')
 
     if test_config:
         app.config.update(test_config)
     else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///finance.db'
+        if getattr(sys, 'frozen', False):
+            # Path where the .exe is located
+            app_dir = os.path.dirname(sys.executable)
+            db_path = os.path.join(app_dir, 'finance.db')
+            app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+        else:
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///finance.db'
 
     db.init_app(app)
     Swagger(app)
@@ -66,6 +82,13 @@ def create_app(test_config=None):
     return app
 
 
+def open_browser():
+    """Wait for server to start and then open browser."""
+    time.sleep(1.5)
+    webbrowser.open("http://127.0.0.1:5000")
+
 if __name__ == '__main__':
     app = create_app()
-    app.run()
+    if getattr(sys, 'frozen', False):
+        threading.Thread(target=open_browser).start()
+    app.run(port=5000)
