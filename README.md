@@ -21,6 +21,11 @@ A state-of-the-art personal finance management system built with Flask, featurin
 - **Smart Projections**: See exactly when you'll hit your milestones based on current trends.
 - **Dynamic UI**: Fluid, responsive interface with hover-aware management tools.
 
+### Desktop App Support
+- **Standalone Executable**: Run the entire system as a native Windows application.
+- **Auto-UI Launch**: Automatically opens your default web browser on startup.
+- **Local Persistence**: Zero-config database stored right next to your application icon.
+
 ### Security & Resilience
 - **Fernet Encryption**: Critical API keys are stored with military-grade symmetric encryption.
 - **Persistence Layer**: Resilient to environment resets via `.env` based auto-reconnection.
@@ -48,6 +53,15 @@ A state-of-the-art personal finance management system built with Flask, featurin
    - Run in dev: `python app.py`
    - Run in prod: `gunicorn -c deploy/gunicorn_config.py "app:create_app()"`
 
+### 3. Windows Executable Build
+For users who prefer a desktop experience without managing Python:
+1. Ensure Python 3.12+ is installed on Windows.
+2. Run the automated build script:
+   ```powershell
+   python build_exe.py
+   ```
+3. Your standalone application will be ready in the `dist/FinanceTracker` directory. Just double-click `FinanceTracker.exe` to launch!
+
 ## Technical Architecture
 - **Backend**: Flask + SQLAlchemy (Modular Blueprints)
 - **Frontend**: Vanilla JS (Dynamic Components) + Chart.js
@@ -61,3 +75,4 @@ https://buymeacoffee.com/Matt23797
 
 ## 📄 License
 MIT
+
