@@ -1,67 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-    .filter-bar {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    .filter-group {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .filter-group label {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        white-space: nowrap;
-    }
-
-    .bulk-actions-bar {
-        position: fixed;
-        bottom: 2rem;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(10px);
-        padding: 1rem 2rem;
-        border-radius: 50px;
-        display: none;
-        gap: 1.5rem;
-        align-items: center;
-        border: 1px solid var(--primary);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        z-index: 100;
-    }
-
-    .bulk-actions-bar.active {
-        display: flex;
-        animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-        from {
-            bottom: -5rem;
-            opacity: 0;
-        }
-
-        to {
-            bottom: 2rem;
-            opacity: 1;
-        }
-    }
-
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-</style>
 <header class="flex-between mb-2">
     <div>
         <h1>Transactions</h1>
@@ -201,8 +140,7 @@
         </div>
         <div id="import-status" style="margin-top: 1rem; display: none;">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="spinner"
-                    style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;">
+                <div class="spinner">
                 </div>
                 <span id="import-status-text" style="font-size: 0.9rem;">Importing transactions...</span>
             </div>
