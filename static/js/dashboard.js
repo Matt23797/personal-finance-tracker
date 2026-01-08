@@ -77,7 +77,11 @@ function renderChart(breakdown) {
     const ctx = canvas.getContext('2d');
     const labels = Object.keys(breakdown);
     const data = Object.values(breakdown);
-    const colors = ['#00d9ff', '#00ff88', '#feca57', '#ff6b6b', '#5f27cd', '#ff9ff3', '#54a0ff'];
+    // Generate distinct colors
+    const colors = labels.map((_, i) => {
+        const hue = (i * 137.508) % 360; // Use golden angle approximation for distribution
+        return `hsl(${hue}, 70%, 60%)`;
+    });
 
     if (categoryChart) categoryChart.destroy();
 
