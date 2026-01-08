@@ -14,6 +14,13 @@ async function loadData() {
         const options = categories.map(c => `<option value="${c}">${c}</option>`).join('');
         filterCat.innerHTML = '<option value="all">All Categories</option>' + options;
         bulkCat.innerHTML = options;
+
+        // Check URL for category filter
+        const urlParams = new URLSearchParams(window.location.search);
+        const prefillCat = urlParams.get('category');
+        if (prefillCat && categories.includes(prefillCat)) {
+            filterCat.value = prefillCat;
+        }
     }
 
     // Fetch Incomes & Expenses

@@ -91,7 +91,16 @@ function renderChart(breakdown) {
                 borderWidth: 0
             }]
         },
-        options: getCommonChartOptions('doughnut')
+        options: {
+            ...getCommonChartOptions('doughnut'),
+            onClick: (e, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const category = labels[index];
+                    window.location.href = `/transactions?category=${encodeURIComponent(category)}`;
+                }
+            }
+        }
     });
 }
 

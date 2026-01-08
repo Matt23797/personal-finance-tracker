@@ -23,7 +23,7 @@ def export_transactions(current_user_id):
             'date': inc.date,
             'type': 'Income',
             'amount': inc.amount,
-            'category': 'Income',
+            'category': inc.category,
             'description': inc.source
         })
         
