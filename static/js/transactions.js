@@ -187,7 +187,7 @@ async function updateCategory(id, newCat) {
 }
 
 // Modal Logic
-function openAddModal(type) {
+async function openAddModal(type) {
     currentType = type;
     const modalTitle = document.getElementById('modal-title');
     const catGroup = document.getElementById('cat-group');
@@ -199,6 +199,21 @@ function openAddModal(type) {
 
     if (catSelect) {
         catSelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    // Load Accounts
+    const accSelect = document.getElementById('txn-account');
+    if (accSelect) {
+        try {
+            const res = await fetchAuth('/api/accounts');
+            if (res.ok) {
+                const accounts = await res.json();
+                accSelect.innerHTML = '<option value="">-- None --</option>' +
+                    accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+            }
+        } catch (e) {
+            console.error('Failed to load accounts for modal');
+        }
     }
 
     if (txnDate) txnDate.valueAsDate = new Date();
@@ -234,6 +249,11 @@ async function submitTransaction() {
     const endpoint = currentType === 'income' ? '/api/incomes' : '/api/expenses';
     const body = { amount, date };
 
+    const accSelect = document.getElementById('txn-account');
+    if (accSelect && accSelect.value) {
+        body.account_id = accSelect.value;
+    }
+
     if (currentType === 'income') {
         body.source = description;
     } else {
@@ -255,11 +275,24 @@ async function submitTransaction() {
 }
 
 // Import Modal Logic
-function openImportModal() {
+async function openImportModal() {
     setupModal('import-modal').open();
     document.getElementById('import-status').style.display = 'none';
     document.getElementById('import-btn').disabled = false;
     document.getElementById('import-file').value = '';
+
+    // Load accounts for dropdown
+    const accountSelect = document.getElementById('import-account');
+    if (accountSelect) {
+        try {
+            const res = await fetchAuth('/api/accounts');
+            if (res.ok) {
+                const accounts = await res.json();
+                accountSelect.innerHTML = '<option value="">-- No specific account --</option>' +
+                    accounts.map(a => `<option value="${a.id}">${a.name} (${a.type})</option>`).join('');
+            }
+        } catch (e) { console.error('Error loading accounts', e); }
+    }
 }
 
 function closeImportModal() {
@@ -268,6 +301,7 @@ function closeImportModal() {
 
 async function processImport() {
     const fileInput = document.getElementById('import-file');
+    const accountSelect = document.getElementById('import-account');
     const statusDiv = document.getElementById('import-status');
     const statusText = document.getElementById('import-status-text');
     const importBtn = document.getElementById('import-btn');
@@ -280,6 +314,9 @@ async function processImport() {
     const file = fileInput.files[0];
     const formData = new FormData();
     formData.append('file', file);
+    if (accountSelect && accountSelect.value) {
+        formData.append('account_id', accountSelect.value);
+    }
 
     statusDiv.style.display = 'block';
     importBtn.disabled = true;

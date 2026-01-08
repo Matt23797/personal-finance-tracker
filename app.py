@@ -10,6 +10,8 @@ from routes.categories import categories_bp
 from routes.imports import imports_bp
 from routes.forecasts import forecasts_bp
 from routes.budget import budget_bp
+from routes.export import export_bp
+from routes.accounts import accounts_bp
 
 import os
 import sys
@@ -48,8 +50,17 @@ def create_app(test_config=None):
     db.init_app(app)
     Swagger(app)
 
+    # Ensure instance folder exists
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
+
     # Configure Production Logging
     if not app.debug:
+        if app.config['SECRET_KEY'] == 'dev_key':
+             app.logger.warning('WARNING: SECRET_KEY is set to default "dev_key". THIS IS INSECURE FOR PRODUCTION!')
+
         if not os.path.exists('logs'):
             os.mkdir('logs')
         file_handler = RotatingFileHandler('logs/finance_tracker.log', maxBytes=10240, backupCount=10)
@@ -71,6 +82,8 @@ def create_app(test_config=None):
     app.register_blueprint(imports_bp)
     app.register_blueprint(forecasts_bp)
     app.register_blueprint(budget_bp)
+    app.register_blueprint(export_bp)
+    app.register_blueprint(accounts_bp)
 
     with app.app_context():
         db.create_all()

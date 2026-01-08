@@ -12,7 +12,9 @@ simplefin_bp = Blueprint('simplefin', __name__, url_prefix='/api/simplefin')
 # Get or generate encryption key (store this securely!)
 def get_encryption_key():
     key = os.environ.get('ENCRYPTION_KEY')
-    key_file = 'finance.key'
+    # Use instance folder for key file if not provided via env
+    # This is more secure than app root as instance/ is often ignored/protected
+    key_file = os.path.join(current_app.instance_path, 'finance.key')
     
     if not key:
         # Check for local key file
@@ -23,11 +25,19 @@ def get_encryption_key():
         if not key:
             # Generate and save to file
             key = Fernet.generate_key().decode()
+            # Ensure instance directory exists
+            try:
+                os.makedirs(os.path.dirname(key_file))
+            except OSError:
+                pass
+                
             with open(key_file, 'w') as f:
                 f.write(key)
             # Set restrictive permissions (read/write for owner only) on Unix-like systems
-            # On Windows, basic file creation is default, but we can't easily set chmod 600 in a cross-platform standard library way without extra modules
-            # Relying on .gitignore for repo security
+            try:
+                os.chmod(key_file, 0o600)
+            except Exception:
+                pass # Best effort
             
             os.environ['ENCRYPTION_KEY'] = key
             
@@ -60,13 +70,19 @@ def claim_setup_token(setup_token):
             # It's already a URL (user pasted the decoded version)
             claim_url = setup_token
         
-        current_app.logger.info(f"[SimpleFin] Claiming token at: {claim_url}")
+        # REDACTED LOGGING
+        safe_log_url = claim_url.split('/create/')[0] + '/create/[REDACTED]' if '/create/' in claim_url else '[REDACTED_URL]'
+        current_app.logger.info(f"[SimpleFin] Claiming token at: {safe_log_url}")
         
         # POST to the claim URL to get the access URL
         response = requests.post(claim_url, timeout=30)
         
         current_app.logger.info(f"[SimpleFin] Claim response status: {response.status_code}")
-        current_app.logger.info(f"[SimpleFin] Claim response: {response.text[:200] if response.text else 'empty'}")
+        # Build safe log message for response
+        log_msg = response.text[:200] if response.text else 'empty'
+        if 'simplefin' in log_msg:
+             log_msg = '[REDACTED_ACCESS_URL]'
+        current_app.logger.info(f"[SimpleFin] Claim response: {log_msg}")
         
         if response.status_code == 200:
             access_url = response.text.strip()
@@ -197,12 +213,49 @@ def sync_accounts(current_user_id):
             accounts = data.get('accounts', [])
             synced_count = 0
             
-            for account in accounts:
-                transactions = account.get('transactions', [])
+            from models import Account
+
+            for account_data in accounts:
+                # 1. Upsert Account
+                acc_id = account_data.get('id')
+                acc_name = account_data.get('name') or 'Unnamed Account'
+                acc_currency = account_data.get('currency', 'USD')
+                acc_balance_str = account_data.get('balance', '0')
+                
+                try:
+                    acc_balance = float(acc_balance_str)
+                except:
+                    acc_balance = 0.0
+
+                # Determine type guess
+                acc_type = 'checking'
+                lower_name = acc_name.lower()
+                if 'saving' in lower_name: acc_type = 'savings'
+                elif 'credit' in lower_name or 'card' in lower_name: acc_type = 'credit'
+                elif 'cash' in lower_name: acc_type = 'cash'
+                elif 'invest' in lower_name or 'broker' in lower_name: acc_type = 'investment'
+
+                db_account = Account.query.filter_by(simplefin_id=str(acc_id), user_id=current_user_id).first()
+                if not db_account:
+                    db_account = Account(
+                        user_id=current_user_id,
+                        simplefin_id=str(acc_id),
+                        name=acc_name,
+                        balance=acc_balance,
+                        type=acc_type,
+                        is_manual=False,
+                        last_synced=datetime.utcnow()
+                    )
+                    db.session.add(db_account)
+                    db.session.flush() # Get ID
+                else:
+                    db_account.balance = acc_balance
+                    db_account.last_synced = datetime.utcnow()
+                    db_account.name = acc_name # Update name if changed
+                
+                # 2. Process Transactions
+                transactions = account_data.get('transactions', [])
                 for txn in transactions:
-                    # SimpleFin transaction structure (typical):
-                    # {'id': '...', 'posted': timestamp, 'amount': '12.34', 'description': '...', 'payee': '...', 'category': '...'}
-                    
                     txn_id = txn.get('id')
                     if not txn_id: 
                         continue
@@ -214,8 +267,6 @@ def sync_accounts(current_user_id):
                     if existing_income or existing_expense:
                         continue
                         
-                    # Process Amount (SimpleFin: usually negative for debit/expense, positive for credit/income)
-                    # Some versions might invert it, but standard is - = money leaving
                     try:
                         amount = float(txn.get('amount', 0))
                     except:
@@ -224,12 +275,12 @@ def sync_accounts(current_user_id):
                     timestamp = txn.get('posted')
                     txn_date = datetime.fromtimestamp(timestamp) if timestamp else datetime.utcnow()
                     description = txn.get('payee') or txn.get('description') or 'Unknown Transaction'
-                    category = 'Other'
                     
                     if amount > 0:
                         # Income
                         new_income = Income(
                             user_id=current_user_id,
+                            account_id=db_account.id, # Link to account
                             amount=amount,
                             source=description,
                             date=txn_date,
@@ -240,14 +291,14 @@ def sync_accounts(current_user_id):
                         
                     elif amount < 0:
                         # Expense
-                        # Apply smart categorization
                         from utils import auto_categorize
                         mapped_category = auto_categorize(description, current_user_id)
                         
                         new_expense = Expense(
                             user_id=current_user_id,
+                            account_id=db_account.id, # Link to account
                             amount=abs(amount),
-                            category=mapped_category, # Use our smart categorization
+                            category=mapped_category, 
                             description=description,
                             date=txn_date,
                             simplefin_id=txn_id

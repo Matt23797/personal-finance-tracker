@@ -32,6 +32,17 @@
 </div>
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+    <div class="card">
+        <h2 class="mb-2">Accounts</h2>
+        <div id="accounts-preview" style="max-height: 300px; overflow-y: auto;">
+            <p class="text-muted">Loading...</p>
+        </div>
+        <div class="mt-2 text-right">
+            <span class="text-muted" style="font-size: 0.9rem">Total: </span>
+            <span id="total-accounts-balance" style="font-size: 1.2rem; font-weight: bold; color: #00ff88;">$0.00</span>
+        </div>
+    </div>
+
     <!-- Expense Breakdown Chart -->
     <div class="card">
         <h2>Expense Breakdown</h2>

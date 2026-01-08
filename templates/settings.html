@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 
+
 {% block content %}
 <header class="mb-2">
     <h1>Settings</h1>
     <p class="text-muted">Manage your account and connections</p>
 </header>
 
-<div style="max-width: 600px;">
+<div>
     <!-- SimpleFin Status -->
     <div class="card">
         <h2>Bank Connection</h2>
@@ -31,34 +32,98 @@
             </div>
             <div id="sync-result" class="mt-2" style="display: none;"></div>
         </div>
-        <!-- Category Management -->
-        <div class="card mt-2">
-            <h2>Manage Categories</h2>
-            <p class="text-muted mb-2">
-                Edit or remove your categories. Renaming will update all historic transactions.
-            </p>
+    </div>
+    <!-- Category Management -->
+    <div class="card mt-2">
+        <h2>Manage Categories</h2>
+        <p class="text-muted mb-2">
+            Edit or remove your categories. Renaming will update all historic transactions.
+        </p>
 
-            <!-- Category Dropdown + Actions -->
-            <div class="flex align-center mb-2"
-                style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
-                    <select id="manage-category-select" onchange="updateManageButtons()" class="w-100"></select>
-                </div>
-                <button class="btn btn-secondary" onclick="renameCurrent()">Rename</button>
-                <button class="btn btn-danger" id="delete-current-btn" onclick="deleteCurrent()">Delete</button>
+        <!-- Category Dropdown + Actions -->
+        <div class="flex align-center mb-2"
+            style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+            <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
+                <select id="manage-category-select" onchange="updateManageButtons()" class="w-100"></select>
             </div>
+            <button class="btn btn-secondary" onclick="renameCurrent()">Rename</button>
+            <button class="btn btn-danger" id="delete-current-btn" onclick="deleteCurrent()">Delete</button>
+        </div>
 
-            <!-- Add Category -->
-            <div class="flex mt-2" style="padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
-                    <input type="text" id="new-cat-name" placeholder="New category name (e.g. Travel)">
-                </div>
-                <button class="btn btn-primary" onclick="addCategory()">Add New</button>
+        <!-- Add Category -->
+        <div class="flex mt-2" style="padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+            <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
+                <input type="text" id="new-cat-name" placeholder="New category name (e.g. Travel)">
             </div>
+            <button class="btn btn-primary" onclick="addCategory()">Add New</button>
+        </div>
+    </div>
+    <!-- Account Management -->
+    <div class="card mb-2">
+        <h2>Accounts</h2>
+        <p class="text-muted mb-2">Manage your connected and manual accounts.</p>
+
+        <div id="accounts-list" class="mb-3">
+            <!-- Accounts will be loaded here -->
+            <p class="text-muted">Loading accounts...</p>
+        </div>
+
+        <h3>Add Manual Account</h3>
+        <div class="flex mt-2">
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="text" id="new-account-name" placeholder="Name (e.g. Cash, Wallet)">
+            </div>
+            <div class="form-group" style="margin-bottom: 0; width: 100px;">
+                <input type="number" id="new-account-balance" placeholder="Balance" step="0.01">
+            </div>
+            <div class="form-group" style="margin-bottom: 0; width: 120px;">
+                <select id="new-account-type">
+                    <option value="checking">Checking</option>
+                    <option value="savings">Savings</option>
+                    <option value="credit">Credit Card</option>
+                    <option value="cash">Cash</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="addAccount()">Add</button>
         </div>
     </div>
 
-    <!-- Rename Modal (simple prompt replacement for now or custom) -->
+    <!-- Data Management -->
+    <div class="card mt-2">
+        <h2>Data Management</h2>
+        <p class="text-muted mb-2">
+            Download a copy of your transaction history.
+        </p>
+        <button class="btn btn-secondary" onclick="exportData()">
+            <i class="fas fa-download"></i> Export to CSV
+        </button>
+    </div>
+
+    <script>
+        async function exportData() {
+            // Direct download using fetchAuth to get token, then blob
+            try {
+                const res = await fetchAuth('/api/export/transactions');
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'finance_export.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                } else {
+                    alert('Export failed');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Export failed');
+            }
+        }
+    </script>
+
     {% endblock %}
 
     {% block scripts %}
@@ -250,7 +315,70 @@
             btn.textContent = 'Sync Now';
         }
 
+        async function loadAccounts() {
+            try {
+                const res = await fetchAuth('/api/accounts');
+                if (res.ok) {
+                    const accounts = await res.json();
+                    renderAccounts(accounts);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderAccounts(accounts) {
+            const list = document.getElementById('accounts-list');
+            if (!list) return;
+
+            if (accounts.length === 0) {
+                list.innerHTML = '<p class="text-muted">No accounts found.</p>';
+                return;
+            }
+
+            list.innerHTML = accounts.map(acc => `
+                <div class="flex align-center mb-2" style="background: rgba(255,255,255,0.03); padding: 0.8rem; border-radius: 8px;">
+                    <div style="flex-grow: 1;">
+                        <strong>${acc.name}</strong> <span class="text-muted">(${acc.type})</span>
+                        ${acc.is_manual ? '<span class="badge">Manual</span>' : '<span class="text-muted"> synced</span>'}
+                    </div>
+                    <div class="mr-2" style="font-size: 1.1rem;">
+                        ${formatCurrency(acc.balance)}
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="deleteAccount(${acc.id})">×</button>
+                </div>
+            `).join('');
+        }
+
+        async function addAccount() {
+            const name = document.getElementById('new-account-name').value;
+            const balance = document.getElementById('new-account-balance').value;
+            const type = document.getElementById('new-account-type').value;
+
+            if (!name) return alert('Name is required');
+
+            const res = await fetchAuth('/api/accounts', {
+                method: 'POST',
+                body: JSON.stringify({ name, balance: balance || 0, type })
+            });
+
+            if (res.ok) {
+                document.getElementById('new-account-name').value = '';
+                document.getElementById('new-account-balance').value = '';
+                loadAccounts();
+            } else {
+                alert('Failed to add account');
+            }
+        }
+
+        async function deleteAccount(id) {
+            if (!confirm('Delete this account? Associated transactions will NOT be deleted, but unlinked.')) return;
+            const res = await fetchAuth(`/api/accounts/${id}`, { method: 'DELETE' });
+            if (res.ok) loadAccounts();
+        }
+
         checkStatus();
         loadCategories();
+        loadAccounts();
     </script>
     {% endblock %}

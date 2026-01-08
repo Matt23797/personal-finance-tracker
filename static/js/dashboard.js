@@ -100,5 +100,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if (periodSelector) {
         periodSelector.addEventListener('change', loadDashboard);
         loadDashboard();
+        loadAccountsPreview();
     }
 });
+
+async function loadAccountsPreview() {
+    const container = document.getElementById('accounts-preview');
+    const totalEl = document.getElementById('total-accounts-balance');
+    if (!container) return;
+
+    try {
+        const res = await fetchAuth('/api/accounts');
+        if (res.ok) {
+            const accounts = await res.json();
+
+            if (accounts.length === 0) {
+                container.innerHTML = '<p class="text-muted">No accounts connected.</p>';
+                totalEl.textContent = formatCurrency(0);
+                return;
+            }
+
+            const total = accounts.reduce((sum, acc) => sum + parseFloat(acc.balance), 0);
+            totalEl.textContent = formatCurrency(total);
+
+            container.innerHTML = accounts.map(acc => `
+                <div class="flex-between mb-2" style="padding: 0.8rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div>
+                        <div style="font-weight: 600;">${acc.name}</div>
+                        <div style="font-size: 0.8rem; color: #aaa;">${acc.type} ${acc.is_manual ? '(manual)' : ''}</div>
+                    </div>
+                    <div style="font-weight: 600; color: #fff;">${formatCurrency(acc.balance)}</div>
+                </div>
+            `).join('');
+        }
+    } catch (e) {
+        console.error('Error loading accounts:', e);
+        container.innerHTML = '<p class="text-danger">Failed to load accounts.</p>';
+    }
+}

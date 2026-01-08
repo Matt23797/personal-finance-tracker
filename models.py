@@ -19,10 +19,20 @@ class User(db.Model):
             'username': self.username
         }
 
+class Account(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    simplefin_id = db.Column(db.String(100), nullable=True) # Null for manual accounts
+    name = db.Column(db.String(100), nullable=False)
+    balance = db.Column(db.Numeric(10, 2), default=0.00)
+    type = db.Column(db.String(50), default='checking') # checking, savings, credit, cash
+    is_manual = db.Column(db.Boolean, default=True)
+    last_synced = db.Column(db.DateTime, default=datetime.utcnow)
+
 class MonthlyIncome(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
     month = db.Column(db.String(7), nullable=False) # Format: YYYY-MM
 
     def to_dict(self):
@@ -36,9 +46,31 @@ class MonthlyIncome(db.Model):
 class Income(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey('account.id', ondelete='CASCADE'), nullable=True)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
     source = db.Column(db.String(100), nullable=False)
-    source = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    category = db.Column(db.String(50), default='Income')
+    simplefin_id = db.Column(db.String(100), unique=True, nullable=True)  # To avoid duplicates from sync
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'account_id': self.account_id,
+            'amount': self.amount,
+            'source': self.source,
+            'date': self.date.isoformat(),
+            'category': self.category
+        }
+
+class Expense(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey('account.id', ondelete='CASCADE'), nullable=True)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    category = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(200), nullable=True)  # For categorization learning
     date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     simplefin_id = db.Column(db.String(100), unique=True, nullable=True)  # To avoid duplicates from sync
 
@@ -46,20 +78,12 @@ class Income(db.Model):
         return {
             'id': self.id,
             'user_id': self.user_id,
+            'account_id': self.account_id,
             'amount': self.amount,
-            'source': self.source,
+            'category': self.category,
+            'description': self.description,
             'date': self.date.isoformat()
         }
-
-class Expense(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
-    category = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(200), nullable=True)  # For categorization learning
-    description = db.Column(db.String(200), nullable=True)  # For categorization learning
-    date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
-    simplefin_id = db.Column(db.String(100), unique=True, nullable=True)  # To avoid duplicates from sync
 
     def to_dict(self):
         return {
@@ -75,8 +99,8 @@ class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     description = db.Column(db.String(200), nullable=False)
-    target_amount = db.Column(db.Float, nullable=False)
-    current_amount = db.Column(db.Float, default=0.0)
+    target_amount = db.Column(db.Numeric(10, 2), nullable=False)
+    current_amount = db.Column(db.Numeric(10, 2), default=0.0)
     deadline = db.Column(db.Date, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -95,7 +119,7 @@ class Budget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     category = db.Column(db.String(100), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
     month = db.Column(db.String(7), nullable=False) # Format: YYYY-MM
     
     def to_dict(self):

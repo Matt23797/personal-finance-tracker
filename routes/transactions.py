@@ -37,9 +37,17 @@ def add_income(current_user_id):
         user_id=current_user_id,
         amount=data['amount'],
         source=data['source'],
+        account_id=data.get('account_id'),
         date=datetime.strptime(data['date'], '%Y-%m-%d').date() if 'date' in data else datetime.utcnow().date()
     )
     db.session.add(new_income)
+    
+    if data.get('account_id'):
+        from models import Account
+        account = Account.query.get(data['account_id'])
+        if account and account.user_id == current_user_id:
+            account.balance = float(account.balance) + float(data['amount'])
+            
     db.session.commit()
     return jsonify({'message': 'Income added'}), 201
 
@@ -95,9 +103,16 @@ def add_expense(current_user_id):
         amount=data['amount'],
         category=category,
         description=description,
+        account_id=data.get('account_id'),
         date=datetime.strptime(data['date'], '%Y-%m-%d').date() if 'date' in data else datetime.utcnow().date()
     )
     db.session.add(new_expense)
+    
+    if data.get('account_id'):
+        from models import Account
+        account = Account.query.get(data['account_id'])
+        if account and account.user_id == current_user_id:
+            account.balance = float(account.balance) - float(data['amount'])
     
     # Learn categorization if description is provided
     if description:
